@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Loading 3d objects</title>
+</head>
+
+<body>
+	<script src="src/three.min.js"></script>
+	<script>
+
+		var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+
+		init();
+		animate();
+
+
+		function init() {
+
+			vec = new THREE.Vector3(0,0,0);
+			container = document.createElement( 'div' );
+			document.body.appendChild( container );
+
+			camera = new THREE.PerspectiveCamera( 75, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 100000 );
+			camera.position.z = 500;
+
+			scene = new THREE.Scene();
+
+			// LIGHTS
+
+			var ambient = new THREE.AmbientLight( 0x222222 );
+			scene.add( ambient );
+
+			var directionalLight = new THREE.DirectionalLight( 0x555555 );
+			directionalLight.position.set( 100, 1000, 100 ).normalize();
+			scene.add( directionalLight );
+			
+			// RENDERER
+			try {
+
+				webglRenderer = new THREE.WebGLRenderer();
+				webglRenderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				webglRenderer.domElement.style.position = "relative";
+
+				container.appendChild( webglRenderer.domElement );
+
+				has_gl = 1;
+
+			}
+			catch (e) {
+			}
+
+			var loader = new THREE.JSONLoader();
+			
+			
+			loader.load( "src/gob_obj.js", function( geometry ) {
+			//loader.load( "obj/testBox/Cone01.js", function( geometry, materials) {
+					//var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial(materials));
+					var mat = new THREE.MeshLambertMaterial();
+					var mesh = new THREE.Mesh(geometry, mat);
+					var s = 10;
+					geometry.computeFaceNormals();
+					//geometry.computeVertexNormals();
+					mesh.scale.set(s, s, s);
+					mesh.position.set(0, 0, 400);
+					scene.add(mesh);
+			});
+
+			window.addEventListener( 'resize', onWindowResize, false );
+			console.log(scene);
+		}
+
+		function onWindowResize() {
+
+			windowHalfX = window.innerWidth / 2;
+			windowHalfY = window.innerHeight / 2;
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			webglRenderer.setSize( window.innerWidth, window.innerHeight );
+		}
+
+		function animate() {
+
+			requestAnimationFrame( animate );
+			render();
+		}
+
+		function render() {
+
+			camera.lookAt(scene.position);
+			webglRenderer.render( scene, camera );
+		}
+
+		/*function render() {
+
+			camera.position.x += ( mouseX - camera.position.x ) * .05;
+			camera.position.y += ( - mouseY - camera.position.y ) * .05;
+
+			camera.lookAt( scene.position );
+
+			if ( render_gl && has_gl ) webglRenderer.render( scene, camera );
+			if ( render_canvas ) canvasRenderer.render( scene, camera );
+
+		}*/
+		
+	</script>
+
+</body>
+</html>
